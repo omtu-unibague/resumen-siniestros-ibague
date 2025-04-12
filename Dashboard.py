@@ -1615,9 +1615,3 @@ def crear_aplicacion(figs):
 # ======================================
 # EJECUCIÓN PRINCIPAL
 # ======================================
-if __name__ == '__main__':
-    data = cargar_datos()
-    graficos = crear_graficos(data)
-    app = crear_aplicacion(graficos)
-    app = app.server
-    app.run(debug=True)
