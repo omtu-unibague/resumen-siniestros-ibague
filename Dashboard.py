@@ -1611,7 +1611,3 @@ def crear_aplicacion(figs):
     dcc.Interval(id="interval-refresh", interval=1000, max_intervals=1)
     )
     return app
-
-# ======================================
-# EJECUCIÓN PRINCIPAL
-# ======================================
