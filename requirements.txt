@@ -6,3 +6,4 @@ plotly
 dash_bootstrap_components
 geopandas
 gunicorn
+openpyxl
