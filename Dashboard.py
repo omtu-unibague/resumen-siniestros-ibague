@@ -1396,7 +1396,7 @@ def crear_aplicacion(figs):
                    r"\assets\mapa_caracterizacion_siniestros.html",
                    r"\assets\mapa_geografia_siniestros_mes.html",
                    r"\assets\mapa_geografia_siniestros_dia.html",
-                   r"\assets\mapa_geografia_siniestros_dia.html"
+                   r"\assets\mapa_geografia_siniestros_hora.html"
                    ]
 
 
