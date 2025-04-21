@@ -1475,8 +1475,8 @@ def crear_aplicacion(figs):
                     crear_seccion("Distribución de Edad", [fig_boxplot_edad_actores]),
                     crear_seccion("Edad Conductores", [fig_distr_edad_conductores]),
                     crear_seccion("Edad Pasajeros", [fig_distr_edad_pasajeros]),
-                    crear_seccion("Edad Peatones", [fig_distr_edad_peatones]),
-                    crear_seccion("Edad Ciclistas", [fig_distr_edad_ciclistas]),
+                    crear_seccion("Edad Peatones", [fig_distr_edad_ciclistas]),
+                    crear_seccion("Edad Ciclistas", [fig_distr_edad_peatones]),
                 ], label="🚶 Actores"),
                 
                 # Pestaña Demografía
