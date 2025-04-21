@@ -10,6 +10,7 @@ from dash.dependencies import Input, Output
 
 
 
+
 # ======================================
 # FUNCIONES AUXILIARES
 # ======================================
@@ -665,28 +666,9 @@ def crear_graficos(data):
     
     df_vehiculos['MES'] = pd.Categorical(df_vehiculos['MES'], categories=meses, ordered=True)
     
-    # Generar gradiente personalizado de azul a gris
-    vehiculos_ordenados = df_vehiculos['CLASE_VEHICULO'].value_counts().index.tolist()
-    num_vehiculos = len(vehiculos_ordenados)
-  
-    # Colores inicial (azul) y final (gris) en RGB
-    inicio = (0, 74, 173)    # #004aad
-    fin = (255, 255, 255)    # #808080
-    
-    # Generar escalonado de colores
-    colores = []
-    for i in range(num_vehiculos):
-        progreso = i / (num_vehiculos - 1) if num_vehiculos > 1 else 0
-        r = inicio[0] + (fin[0] - inicio[0]) * progreso
-        g = inicio[1] + (fin[1] - inicio[1]) * progreso
-        b = inicio[2] + (fin[2] - inicio[2]) * progreso
-        colores.append(f"#{int(r):02x}{int(g):02x}{int(b):02x}")
-    
     # Crear diccionario de colores para cada vehículo
-    colores_vehiculos = {
-        vehiculo: colores[i] 
-        for i, vehiculo in enumerate(vehiculos_ordenados)
-    }
+    colores_vehiculos = {"CARRETILLA":"#c0d2eb","MOTOCARRO":"#003882","TAXI":"#000A16","VOLQUETA":"#406FAC","BICICLETA":"#001C42"
+                         ,"CAMION":"#002557","BUS":"#000000","CAMIONETA":"#80a5d6","AUTOMOVIL":"#004AAD","MOTO":"#00132C"}
     
     fig_mensual = crear_grafico_apilado(
         df_vehiculos.sort_values('MES'), 'MES', 'CLASE_VEHICULO',
@@ -1404,6 +1386,20 @@ def crear_aplicacion(figs):
         if isinstance(figura, go.Figure):
             figura.update_layout(autosize=True)
 
+    nombres_mapas = ["Mapa de Actores Viales", 
+                     "Mapa de Caracterización de Siniestros", 
+                     "Mapa de Siniestralidad por Mes", 
+                     "Mapa de Siniestralidad por día", 
+                     "Mapa de Siniestralidad por hora"]
+    
+    rutas_mapas = [r"\assets\mapa_actores_viales.html",
+                   r"\assets\mapa_caracterizacion_siniestros.html",
+                   r"\assets\mapa_geografia_siniestros_mes.html",
+                   r"\assets\mapa_geografia_siniestros_dia.html",
+                   r"\assets\mapa_geografia_siniestros_hora.html"
+                   ]
+
+
     # Estilos
     ESTILOS = {
         'titulo_principal': {
@@ -1514,7 +1510,45 @@ def crear_aplicacion(figs):
                             ], label="🗓️ Por Día")
                         ]
                     )
-                ], label="⏱️ Temporal")
+                ], label="⏱️ Temporal"),
+                # Pestaña Mapas (sin subpestañas)
+                # Pestaña Mapas (sin subpestañas)
+                dbc.Tab([
+                    html.Div([
+                        html.H3("Mapas", style=ESTILOS['titulo_seccion']),
+                        html.P(
+                            "Exploración Geográfica de Siniestros Viales. En esta sección, presentamos una serie de mapas interactivos diseñados para analizar y visualizar datos relacionados con siniestros viales desde diferentes perspectivas, para interactuar debes seleccionar un mapa y en la esquina superior izquierda encontraras el boton que despliega las diferentes capas por categoría de cada mapa",
+                            style={'textAlign': 'justify', 'marginBottom': '20px'}
+                        ),
+                        # Contenedor principal con el DropdownMenu centrado
+                        html.Div([
+                            dbc.DropdownMenu(
+                                label="Seleccionar Mapa",
+                                children=[
+                                    dbc.DropdownMenuItem(
+                                        nombres_mapas[i],
+                                        id=f"menu-item-{i+1}",
+                                        n_clicks=0
+                                    )
+                                    for i in range(len(nombres_mapas))
+                                ],
+                                color="primary",
+                                direction="down",
+                                style={'marginBottom': '20px'}
+                            ),
+                            html.Iframe(
+                                id="iframe-mapas",
+                                src=rutas_mapas[0],
+                                style={'width': '100%', 'height': '600px', 'border': 'none'}
+                            ),
+                            # Div para mostrar el texto dinámico
+                            html.Div(
+                                id="texto-dinamico",
+                                style={'textAlign': 'justify', 'marginTop': '20px', 'color': '#333'}
+                            )
+                        ], style={'textAlign': 'center'})
+                    ], style=ESTILOS['seccion'])
+                ], label="🗺️ Mapas")
             ]
         )
     ], fluid=True, style={'height': '100vh'})
@@ -1534,13 +1568,46 @@ def crear_aplicacion(figs):
          Input('inner-tabs', 'active_tab')]
     )
 
-    return app
+    
+    # Callback para cambiar el mapa en el iframe
+    @app.callback(
+        Output("iframe-mapas", "src"),
+        [Input(f"menu-item-{i+1}", "n_clicks") for i in range(len(nombres_mapas))]
+    )
+    def actualizar_mapa(*args):
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            return rutas_mapas[0]  # Mostrar el primer mapa por defecto
+        
+        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        index = int(triggered_id.split("-")[-1]) - 1
+        return rutas_mapas[index]
 
-# ======================================
-# EJECUCIÓN PRINCIPAL
-# ======================================
-if __name__ == '__main__':
-    data = cargar_datos()
-    graficos = crear_graficos(data)
-    app = crear_aplicacion(graficos)
-    app.run(debug=True)
+    # Callback para actualizar el texto dinámico
+    @app.callback(
+        Output("texto-dinamico", "children"),
+        [Input(f"menu-item-{i+1}", "n_clicks") for i in range(len(nombres_mapas))]
+    )
+    def actualizar_texto(*args):
+        ctx = dash.callback_context
+        if not ctx.triggered:
+            return "Seleccione un mapa para ver su descripción."
+        
+        triggered_id = ctx.triggered[0]["prop_id"].split(".")[0]
+        index = int(triggered_id.split("-")[-1]) - 1
+        
+        # Textos específicos para cada mapa
+        textos_mapas = [
+            "1. Mapa de Actores Viales: Este mapa muestra la ubicación geográfica de los actores involucrados en siniestros viales.",
+            "2. Mapa de Caracterización de Siniestros: Aquí se presenta una visión detallada de los tipos de siniestros ocurridos.",
+            "3. Mapa de Siniestralidad por Mes: Este mapa explora la evolución temporal de los siniestros a nivel mensual.",
+            "4. Mapa de Siniestralidad por Día: Con este mapa, es posible analizar la distribución diaria de los siniestros.",
+            "5. Mapa de Siniestralidad por Hora: Este mapa se centra en la dimensión horaria de los siniestros."
+        ]
+        
+        return textos_mapas[index]
+    
+    app.layout.children.append(
+    dcc.Interval(id="interval-refresh", interval=1000, max_intervals=1)
+    )
+    return app
