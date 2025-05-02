@@ -15,22 +15,22 @@ pip install pandas plotly dash geopandas numpy dash-bootstrap-components
 
 3. Carga de Datos (cargar_datos function )
     Esta función es responsable de cargar todos los datos necesarios para el análisis.
-        •	Archivo Excel: Lee múltiples hojas (Vehiculos_Desagregados, Caracterización del Siniestro, Caracterización Actores Viales, Demografía Involucrados, Datos Geográficos y Temporales) del archivo BD_Dashboard.xlsx.
+        •	Archivo Excel: Lee múltiples hojas (Vehiculos_Desagregados, Caracterización del Siniestro, Caracterización Actores Viales,              Demografía Involucrados, Datos Geográficos y Temporales) del archivo BD_Dashboard.xlsx.
         •	Shapefile: Carga un archivo shapefile de comunas desde Comunas/COMUNAS_UNIDAS.shp para análisis geográfico.
-        •	Limpieza de Coordenadas: Llama a la función limpiar_coordenadas para limpiar y convertir las columnas de latitud y longitud en los DataFrames relevantes.
-        •	GeoDataFrame: Crea un GeoDataFrame (gdf_puntos) a partir de las coordenadas de los vehículos, asegurando que el sistema de referencia de coordenadas (CRS) coincida con el del shapefile de comunas.
+        •	Limpieza de Coordenadas: Llama a la función limpiar_coordenadas para limpiar y convertir las columnas de latitud y longitud             en los DataFrames relevantes.
+        •	GeoDataFrame: Crea un GeoDataFrame (gdf_puntos) a partir de las coordenadas de los vehículos, asegurando que el sistema de              referencia de coordenadas (CRS) coincida con el del shapefile de comunas.
         •	Salida: Devuelve un diccionario que contiene todos los DataFrames cargados y el GeoDataFrame de comunas.
 
 4. Funciones Auxiliares (Creación de Gráficos)
     El código define varias funciones auxiliares para generar diferentes tipos de gráficos con Plotly de manera estandarizada:
-        •	limpiar_coordenadas(df): Limpia las columnas 'LATITUD' y 'LONGITUD' de un DataFrame, eliminando caracteres no numéricos, reemplazando comas por puntos y convirtiendo a tipo numérico. Elimina filas con coordenadas inválidas.
-        •	crear_grafico_barras(...): Genera un gráfico de barras vertical. Puede trabajar con datos crudos (calculando conteos) o datos ya agregados. Muestra porcentajes en el texto de la barra y en el hover.
+        •	limpiar_coordenadas(df): Limpia las columnas 'LATITUD' y 'LONGITUD' de un DataFrame, eliminando caracteres no numéricos,                reemplazando comas por puntos y convirtiendo a tipo numérico. Elimina filas con coordenadas inválidas.
+        •	crear_grafico_barras(...): Genera un gráfico de barras vertical. Puede trabajar con datos crudos (calculando conteos) o                 datos ya agregados. Muestra porcentajes en el texto de la barra y en el hover.
         •	crear_grafico_apilado(...): Crea un gráfico de barras apiladas, útil para comparar la composición de categorías.
         •	crear_grafico_barras_horizontal(...): Genera un gráfico de barras horizontal, ordenado por valor. Puede mostrar porcentajes opcionalmente.
-        •	crear_grafico_comparativo(...): Crea gráficos de barras agrupadas o apiladas para comparar múltiples columnas numéricas a través de una categoría. Puede manejar ordenamiento específico de categorías (como meses) y un modo especial (modo_total) para mostrar solo barras totales horizontales.
-        •	crear_histograma(...): Genera un histograma para visualizar la distribución de una variable numérica. Permite calcular automáticamente el número de bins (usando la regla de Friedman-Diaconis) o especificarlo manualmente. Puede filtrar por una categoría y subcategoría.
-        •	crear_boxplot(...): Crea un diagrama de cajas y bigotes (boxplot) para comparar la distribución de una variable numérica entre diferentes categorías.
-        •	grafico_comparativo_sencillo(...): Una versión simplificada para crear gráficos de barras agrupadas a partir de un DataFrame que ya contiene la categoría y el valor.
+        •	crear_grafico_comparativo(...): Crea gráficos de barras agrupadas o apiladas para comparar múltiples columnas numéricas a               través de una categoría. Puede manejar ordenamiento específico de categorías (como meses) y un modo especial (modo_total)               para mostrar solo barras totales horizontales.
+        •	crear_histograma(...): Genera un histograma para visualizar la distribución de una variable numérica. Permite calcular                  automáticamente el número de bins (usando la regla de Friedman-Diaconis) o especificarlo manualmente. Puede filtrar por una             categoría y subcategoría.
+        •	crear_boxplot(...): Crea un diagrama de cajas y bigotes (boxplot) para comparar la distribución de una variable numérica                entre diferentes categorías.
+        •	grafico_comparativo_sencillo(...): Una versión simplificada para crear gráficos de barras agrupadas a partir de un                      DataFrame que ya contiene la categoría y el valor.
         •	crear_sunburst_chart(...): Genera un gráfico Sunburst para visualizar datos jerárquicos.
 
 5. Creación Centralizada de Gráficos (crear_graficos function )
@@ -63,13 +63,13 @@ pip install pandas plotly dash geopandas numpy dash-bootstrap-components
         •	Layout: 
             o	Utiliza dbc.Container como contenedor principal.
             o	Define un título principal.
-            o	Organiza el contenido en pestañas principales (dbc.Tabs) para Vehículos, Siniestros, Actores, Demografía, Temporal y Mapas.
+            o	Organiza el contenido en pestañas principales (dbc.Tabs) para Vehículos, Siniestros, Actores, Demografía, Temporal y                    Mapas.
             o	La pestaña "Temporal" contiene sub-pestañas para "Temporalidad" y "Por Día".
-            o	Utiliza la función crear_seccion para generar bloques estandarizados que contienen un título de sección y los gráficos correspondientes.
-            o	La pestaña "Mapas" incluye un menú desplegable (dbc.DropdownMenu) para seleccionar diferentes mapas HTML y un html.Iframe para mostrarlos. También incluye un área para texto descriptivo dinámico.
+            o	Utiliza la función crear_seccion para generar bloques estandarizados que contienen un título de sección y los gráficos                  correspondientes.
+            o	La pestaña "Mapas" incluye un menú desplegable (dbc.DropdownMenu) para seleccionar diferentes mapas HTML y un                           html.Iframe para mostrarlos. También incluye un área para texto descriptivo dinámico.
         •	Interactividad (Callbacks): 
-            o	Redimensionamiento: Un clientside_callback asegura que los gráficos se redimensionen correctamente cuando se cambia de pestaña.
-            o	Actualización de Mapas: Un callback actualiza el atributo src del Iframe según el mapa seleccionado en el menú desplegable.
+            o	Redimensionamiento: Un clientside_callback asegura que los gráficos se redimensionen correctamente cuando se cambia de                  pestaña.
+            o	Actualización de Mapas: Un callback actualiza el atributo src del Iframe según el mapa seleccionado en el menú                          desplegable.
             o	Actualización de Texto: Otro callback actualiza el texto descriptivo debajo del mapa según la selección.
         •	Salida: Devuelve el objeto app de Dash configurado.
 
