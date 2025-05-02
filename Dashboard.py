@@ -9,8 +9,6 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 
 
-
-
 # ======================================
 # FUNCIONES AUXILIARES
 # ======================================
@@ -893,11 +891,11 @@ def cargar_datos():
         comunas = data['comunas']
     """
     # Cargar datos de ambas hojas
-    df_vehiculos = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Vehiculos_Desagregados")
-    df_siniestros = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Caracterización del Siniestro")
-    df_actores = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Caracterización Actores Viales")
-    df_poblacion = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Demografía Involucrados")
-    df_geografia = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Datos Geográficos y Temporales")
+    df_vehiculos = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Vehiculos_Desagregados")
+    df_siniestros = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Caracterización del Siniestro")
+    df_actores = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Caracterización Actores Viales")
+    df_poblacion = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Demografía Involucrados")
+    df_geografia = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Datos Geográficos y Temporales")
 
     # Cargar shapefile una vez
     comunas = gpd.read_file("Comunas/COMUNAS_UNIDAS.shp").to_crs(epsg=4326)
