@@ -1,7 +1,6 @@
-Este es el repositorio de la investigación de David Trujillo realizada en el semestre 2025A, tener en cuenta qu hay 2 repositorios
-este es el de consulta, error y sirve como punto de referencia de lo que hice, hay un segundo repositorio que se encarga de mostrar
-en la web este código. En este repositorio encuentras las siguientes carpetas:
+Este es el repositorio de la investigación de David Trujillo realizada en el semestre 2025A
 
+Este repositorio contiene los siguientes archivos
 -Comunas: Incluye el shapefile de las comunas de Ibagué, esto es importante conservarlo ya que puede ser util para otras 
 investigaciones
 -Dashboard: Esta carpeta contiene los archivos necesarios para el funcionamiento de la vista
@@ -12,15 +11,11 @@ primero debe funcionar aqui
 obtener la base de datos final
 
 ****IMPORTANTE****
-Todos los archivos aqui contenidos pueden ser modificados sin temor a alterar nada, lo importante es si no se tiene conocimiento
-de como manejar la herramienta github realiza una copia del archivo a trabajar y trabaja sobre esa copia una vez confirmado que
-todo funciona sobreescribir el archivo.
-
-cualquier cambio en este repositorio no afectara la vista web de este codigo que está en https://resumen-siniestros-ibague.onrender.com/
-lo importante es que cualquier modificación a la base de datos o al archivo Dashboard debe probarse aqui primero para evitar 
+cualquier cambio en este repositorio  afectara la vista web de este codigo que está en https://resumen-siniestros-ibague-o0ga.onrender.com
+lo importante es que cualquier modificación a la base de datos o al archivo Dashboard debe probarse primero para evitar 
 errores y que se pierda la vista pública
 
-No cambiar los nombres de los archivos ya que el código esta amarrado a los nombres que allí se encuentran así como la
+No cambiar los nombres de los archivos ya que el código esta enlazado a los nombres que allí se encuentran así como la
 ruta de los archivos.
 
 Cualquier cambio en la estructura de la base de datos, entiendase por, cambio en el nombre de las columnas y/o añadir o retirar columnas
