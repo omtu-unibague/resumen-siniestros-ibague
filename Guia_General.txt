@@ -1,0 +1,44 @@
+Este es el repositorio de la investigación de David Trujillo realizada en el semestre 2025A, tener en cuenta qu hay 2 repositorios
+este es el de consulta, error y sirve como punto de referencia de lo que hice, hay un segundo repositorio que se encarga de mostrar
+en la web este código. En este repositorio encuentras las siguientes carpetas:
+
+-Comunas: Incluye el shapefile de las comunas de Ibagué, esto es importante conservarlo ya que puede ser util para otras 
+investigaciones
+-Dashboard: Esta carpeta contiene los archivos necesarios para el funcionamiento de la vista
+de siniestralidad que se encuentra en la página del observatorio, cualquier modificación que se quiera realizar,
+primero debe funcionar aqui
+-GTFS: Esta carpeta contiene archivos correspondientes a los GTFS solicitados por Juan
+-Tratamientos: Esta carpeta contiene las bases de Datos originales, así como las bases de datos con tratamientos para
+obtener la base de datos final
+
+****IMPORTANTE****
+Todos los archivos aqui contenidos pueden ser modificados sin temor a alterar nada, lo importante es si no se tiene conocimiento
+de como manejar la herramienta github realiza una copia del archivo a trabajar y trabaja sobre esa copia una vez confirmado que
+todo funciona sobreescribir el archivo.
+
+cualquier cambio en este repositorio no afectara la vista web de este codigo que está en https://resumen-siniestros-ibague.onrender.com/
+lo importante es que cualquier modificación a la base de datos o al archivo Dashboard debe probarse aqui primero para evitar 
+errores y que se pierda la vista pública
+
+No cambiar los nombres de los archivos ya que el código esta amarrado a los nombres que allí se encuentran así como la
+ruta de los archivos.
+
+Cualquier cambio en la estructura de la base de datos, entiendase por, cambio en el nombre de las columnas y/o añadir o retirar columnas
+implica cambiar la lógica del código para los gráficos y los mapas. Mi recomendación es la siguiente:
+
+*Si se van a añadir datos, depurarlos para que coincidan con la estructura de la base de datos, dejo un video 
+explicando como realice todo el proceso de limpieza y organización de los datos, este cambio solo requiere de añadir los datos al excel
+y todo lo demás se actualizará de forma automática, lo importante es que debe apegarse estrictamente al formato de la base de datos original
+
+*Si se va a modificar un gráfico o un mapa primero revisar la lógica del código que variables involucra y que se quiere cambiar, 
+apoyarse en IA, dandole el fragmento de código a modificar y solicitandole que arroje la modificación integrada
+
+*Si se va a cambiar la estructura de la base de datos recomiendo rehacer completamente el archivo Dashboard.py, tomando el original
+como referencia a nivel de gráficos, lógica, librerías y estructura de código, apoyarse en IA para entender el código copiandolo
+y pegandolo y solicitando que explique la logica y demás. Este archivo es util como insumo para guiarse y realizar los ajustes deseados
+
+
+
+
+
+

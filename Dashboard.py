@@ -15,7 +15,27 @@ from dash.dependencies import Input, Output
 # FUNCIONES AUXILIARES
 # ======================================
 def limpiar_coordenadas(df):
-    """Limpia y convierte coordenadas de manera vectorizada"""
+    """
+    Limpia y convierte coordenadas geográficas (LATITUD y LONGITUD) en un DataFrame 
+    de manera vectorizada para garantizar su consistencia numérica.
+
+    Procesa cada columna de coordenadas realizando los siguientes pasos:
+    1. Convierte los valores a tipo string para asegurar uniformidad.
+    2. Elimina caracteres no deseados que no sean dígitos, puntos o guiones,
+       utilizando expresiones regulares.
+    3. Reemplaza comas por puntos para manejar decimales correctamente.
+    4. Convierte los valores resultantes a tipo numérico, forzando los valores 
+       inválidos a NaN (valores faltantes).
+    5. Elimina filas del DataFrame donde las columnas LATITUD o LONGITUD tengan 
+       valores nulos, asegurando que solo se mantengan registros con coordenadas válidas.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene las columnas 'LATITUD' y 'LONGITUD'.
+
+    Retorna:
+        pd.DataFrame: Un DataFrame filtrado con las columnas LATITUD y LONGITUD limpias 
+                      y convertidas a formato numérico, sin filas con valores nulos.
+    """
     for col in ['LATITUD', 'LONGITUD']:
         df[col] = (
             df[col].astype(str)
@@ -35,7 +55,37 @@ def crear_grafico_barras(
         columna_categoria: list =None,
         tickangle: int = 0,
         columna_valor: list =None):
+    """
+    Crea un gráfico de barras personalizado utilizando Plotly, con opciones para manejar datos crudos o precalculados.
 
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        columna (str): Nombre de la columna categórica a analizar cuando se usan datos crudos.
+        titulo (str): Título del gráfico.
+        color (str): Color de las barras en formato hexadecimal. Por defecto es "#004aad".
+        datos_agregados (bool): Indica si los datos ya están precalculados. Si es True, se requieren 
+                                `columna_categoria` y `columna_valor`. Por defecto es False.
+        columna_categoria (list): Nombre de la columna que contiene las categorías cuando se usan datos agregados.
+        tickangle (int): Ángulo de rotación de las etiquetas del eje x. Por defecto es 0.
+        columna_valor (list): Nombre de la columna que contiene los valores cuando se usan datos agregados.
+
+    Retorna:
+        go.Figure: Un objeto Figure de Plotly que representa el gráfico de barras.
+
+    Funcionalidad:
+        - Si `datos_agregados` es False (modo por defecto), la función calcula la frecuencia de las categorías 
+          en la columna especificada y genera un gráfico de barras básico.
+        - Si `datos_agregados` es True, se espera que el usuario proporcione columnas precalculadas (`columna_categoria` 
+          y `columna_valor`) para construir el gráfico directamente.
+        - El gráfico incluye etiquetas con los valores absolutos y porcentajes sobre cada barra.
+        - La interacción está habilitada mediante hover, mostrando detalles como categoría, valor y porcentaje.
+        - El diseño del gráfico es altamente personalizable, incluyendo título centrado, colores de fondo, 
+          ajustes de ejes y rotación de etiquetas.
+
+    Excepciones:
+        - Si `datos_agregados` es True pero no se proporcionan `columna_categoria` y `columna_valor`, 
+          se lanza un ValueError indicando que ambos parámetros son obligatorios.
+    """
     if datos_agregados:
         # Validar parámetros para datos precalculados
         if not columna_categoria or not columna_valor:
@@ -161,6 +211,47 @@ def crear_grafico_apilado(df, grupo, stack, titulo, colores):
     return fig
 
 def crear_grafico_barras_horizontal(df, col_x, col_y, titulo, color="#004aad", mostrar_porcentaje=False):
+    """
+    Crea un gráfico de barras apiladas estandarizado utilizando Plotly.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        grupo (str): Nombre de la columna categórica que define las categorías en el eje X.
+        stack (str): Nombre de la columna categórica que define las subcategorías para apilar.
+        titulo (str): Título del gráfico.
+        colores (dict): Diccionario que mapea las categorías de 'stack' a colores específicos 
+                        en formato hexadecimal. Si una categoría no tiene color asignado, 
+                        se utiliza gris (#808080) como predeterminado.
+
+    Retorna:
+        go.Figure: Un objeto Figure de Plotly que representa el gráfico de barras apiladas.
+
+    Descripción:
+        - Calcula la tabla de contingencia entre las columnas 'grupo' y 'stack' usando `pd.crosstab`.
+        - Ordena las columnas de la tabla por la suma total de cada subcategoría en orden descendente.
+        - Crea un gráfico de barras apiladas donde cada barra representa una categoría de 'grupo' 
+          y las subcategorías de 'stack' se apilan dentro de cada barra.
+        - Incluye etiquetas de texto dentro de las barras con el valor correspondiente, formateado sin decimales.
+        - La interacción está habilitada mediante hover, mostrando detalles como categoría, subcategoría y cantidad.
+        - El diseño del gráfico es altamente personalizable, incluyendo título centrado, leyenda, colores, 
+          ajustes de ejes y configuraciones de cuadrícula.
+
+    Ajustes Visuales:
+        - Las barras están apiladas (`barmode="stack"`).
+        - El texto dentro de las barras es blanco y utiliza una fuente Arial de tamaño 14.
+        - Las etiquetas del eje X están rotadas 45 grados para mejorar la legibilidad.
+        - El eje Y tiene un rango dinámico que permite un 10% de espacio adicional sobre el valor máximo.
+        - Se ocultan las líneas de cuadrícula en el eje X y se utilizan líneas blancas en el eje Y.
+
+    Ejemplo de uso:
+        fig = crear_grafico_apilado(
+            df=df,
+            grupo="CATEGORIA",
+            stack="SUBCATEGORIA",
+            titulo="Distribución Apilada por Categoría y Subcategoría",
+            colores={"SUBCAT_A": "#004aad", "SUBCAT_B": "#d9534f"}
+        )
+    """
     # Ordenar datos
     df = df.sort_values(col_x, ascending=True)
     
@@ -226,7 +317,36 @@ def crear_grafico_comparativo(df: pd.DataFrame,
     modo_barras: str = "group",
     tickangle: int = 0,
     modo_total: bool = False) -> go.Figure:
+    """
+    Crea un gráfico de barras comparativo utilizando Plotly, con opciones para visualizar datos agrupados o totales.
 
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        col_categoria (str): Nombre de la columna categórica que define las categorías en el eje X.
+        columnas_comparar (list): Lista de nombres de columnas numéricas a comparar.
+        titulo (str): Título del gráfico.
+        colores (list): Lista de colores en formato hexadecimal para cada serie. Por defecto, usa colores de Plotly.
+        nombres_series (list): Lista de nombres personalizados para las series. Por defecto, usa los nombres de las columnas.
+        orden_categorias (list): Lista opcional para especificar el orden de las categorías en el eje X.
+        modo_barras (str): Modo de visualización de las barras ("group" para agrupadas, "stack" para apiladas).
+        tickangle (int): Ángulo de rotación de las etiquetas del eje X. Por defecto es 0.
+        modo_total (bool): Si es True, muestra un gráfico horizontal con totales. Por defecto es False.
+
+    Retorna:
+        go.Figure: Un objeto Figure de Plotly que representa el gráfico comparativo.
+
+    Funcionalidad:
+        - Realiza validaciones básicas para asegurar que los parámetros proporcionados sean consistentes.
+        - Si `modo_total` es True, genera un gráfico horizontal que muestra los totales de las columnas comparativas.
+        - Si `modo_total` es False, genera un gráfico de barras comparativo con las categorías en el eje X y los valores en el eje Y.
+        - Permite personalizar el orden de las categorías, los colores, los nombres de las series y el modo de las barras.
+        - Incluye interacción mediante hover, mostrando detalles como categoría, valor y porcentaje del total.
+        - El diseño del gráfico es altamente personalizable, incluyendo título centrado, leyenda, colores, ajustes de ejes y configuraciones de cuadrícula.
+
+    Excepciones:
+        - Lanza un ValueError si no se especifican columnas para comparar.
+        - Lanza un ValueError si las listas de colores o nombres de series no coinciden con el número de columnas a comparar.
+    """
      # Validaciones básicas
     if len(columnas_comparar) < 1:
         raise ValueError("Debe especificar al menos una columna para comparar")
@@ -345,6 +465,49 @@ def crear_histograma(
     subcategoria: str = None,
     tickangle: int = 0
 ) -> go.Figure:
+    """
+        Crea un histograma personalizado utilizando Plotly para visualizar la distribución de una columna numérica.
+
+        Parámetros:
+            df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+            columna_numerica (str): Nombre de la columna numérica para generar el histograma.
+            titulo (str): Título del gráfico.
+            color (str): Color de las barras en formato hexadecimal. Por defecto es "#004aad".
+            auto_bins (bool): Si es True, calcula automáticamente el número de bins usando el método de Friedman-Diaconis. 
+                            Por defecto es True.
+            num_bins (int): Número manual de bins si `auto_bins` es False. Por defecto es 30 si no se especifica.
+            columna_categoria (str): Nombre de la columna categórica para filtrar los datos. Opcional.
+            subcategoria (str): Valor específico dentro de la columna categórica para filtrar los datos. Opcional.
+            tickangle (int): Ángulo de rotación de las etiquetas del eje X. Por defecto es 0.
+
+        Retorna:
+            go.Figure: Un objeto Figure de Plotly que representa el histograma.
+
+        Funcionalidad:
+            - Verifica que las columnas especificadas existan en el DataFrame.
+            - Normaliza y filtra los datos según las categorías y subcategorías proporcionadas.
+            - Convierte la columna numérica a valores numéricos válidos, eliminando valores no numéricos o nulos.
+            - Calcula dinámicamente el número de bins usando el método de Friedman-Diaconis si `auto_bins` es True.
+            - Genera etiquetas de intervalos personalizadas para el eje X.
+            - Configura el diseño del gráfico con opciones como título centrado, colores, ajustes de ejes y cuadrícula.
+            - Incluye interacción mediante hover, mostrando detalles como valor y frecuencia.
+
+        Excepciones:
+            - Lanza un ValueError si la columna numérica o categórica no existe en el DataFrame.
+            - Lanza un ValueError si no hay datos válidos después del filtrado.
+            - Lanza un ValueError si no hay datos para la subcategoría especificada.
+
+        Ejemplo de uso:
+            fig = crear_histograma(
+                df=df,
+                columna_numerica="EDAD",
+                titulo="Distribución de Edades",
+                color="#004aad",
+                auto_bins=True,
+                columna_categoria="GENERO",
+                subcategoria="MASCULINO"
+            )
+        """
 
 # Verificar si la columna numérica existe en el DataFrame
     if columna_numerica not in df.columns:
@@ -455,7 +618,35 @@ def crear_histograma(
     return fig
 
 def crear_boxplot(df: pd.DataFrame, columna_num: str, columna_cat: str, titulo: str, color: str = None) -> go.Figure:
-    
+    """
+    Crea un diagrama de cajas y bigotes (boxplot) utilizando Plotly para comparar la distribución 
+    de una variable numérica entre diferentes categorías.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        columna_num (str): Nombre de la columna numérica cuya distribución se desea analizar.
+        columna_cat (str): Nombre de la columna categórica que define las categorías.
+        titulo (str): Título del gráfico.
+        color (str): Color personalizado para el boxplot en formato hexadecimal. 
+                     Si no se especifica, se usará un esquema de colores predeterminado.
+
+    Retorna:
+        go.Figure: Un objeto Figure de Plotly que representa el boxplot.
+
+    Funcionalidad:
+        - Verifica que las columnas especificadas existan en el DataFrame.
+        - Asegura que la columna numérica sea de tipo numérico.
+        - Genera un boxplot donde el eje X representa las categorías y el eje Y muestra la distribución 
+          de los valores numéricos.
+        - Permite personalizar el color del gráfico si se proporciona un valor en el parámetro `color`.
+        - Configura el diseño del gráfico con opciones como título centrado, colores de fondo, ajustes 
+          de ejes y cuadrícula.
+        - Incluye interacción mediante hover, mostrando detalles como categoría y valores estadísticos.
+
+    Excepciones:
+        - Lanza un ValueError si las columnas especificadas no existen en el DataFrame.
+        - Lanza un ValueError si la columna numérica no es de tipo numérico.
+    """
     # Validación de datos
     if columna_num not in df.columns or columna_cat not in df.columns:
         raise ValueError(f"Las columnas '{columna_num}' o '{columna_cat}' no existen en el DataFrame.")
@@ -494,6 +685,45 @@ def crear_boxplot(df: pd.DataFrame, columna_num: str, columna_cat: str, titulo: 
     return fig   
 
 def grafico_comparativo_sencillo(df: pd.DataFrame, col_categoria: str, col_valor: str, titulo: str, colores: list = None, nombres_series: list = None, tickangle: int=0):
+    """
+    Crea un gráfico de barras comparativo sencillo utilizando Plotly.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        col_categoria (str): Nombre de la columna categórica que define las categorías en el eje X.
+        col_valor (str): Nombre de la columna numérica que define los valores en el eje Y.
+        titulo (str): Título del gráfico.
+        colores (list): Lista opcional de colores en formato hexadecimal para personalizar las barras. 
+                        Si no se especifica, se usan colores predeterminados de Plotly.
+        nombres_series (list): Lista opcional de nombres personalizados para las series. 
+                               Si no se especifica, se usan los valores de la columna categórica.
+        tickangle (int): Ángulo de rotación de las etiquetas del eje X. Por defecto es 0.
+
+    Retorna:
+        go.Figure: Un objeto Figure de Plotly que representa el gráfico de barras comparativo.
+
+    Funcionalidad:
+        - Verifica que las columnas `col_categoria` y `col_valor` existan en el DataFrame.
+        - Asigna colores predeterminados si no se proporciona una lista de colores.
+        - Asigna nombres legibles para las series si no se especifican nombres personalizados.
+        - Crea un gráfico de barras donde cada categoría tiene su propia barra con texto descriptivo.
+        - Configura el diseño del gráfico con opciones como título centrado, colores de fondo, leyenda y cuadrícula.
+        - Incluye interacción mediante hover, mostrando detalles como categoría y valor.
+
+    Excepciones:
+        - Lanza un ValueError si las columnas `col_categoria` o `col_valor` no están presentes en el DataFrame.
+
+    Ejemplo de uso:
+        fig = grafico_comparativo_sencillo(
+            df=df,
+            col_categoria="CATEGORIA",
+            col_valor="VALOR",
+            titulo="Comparación de Valores por Categoría",
+            colores=["#004aad", "#d9534f"],
+            nombres_series=["Grupo A", "Grupo B"],
+            tickangle=45
+        )
+    """
     # Validaciones básicas
     if col_categoria not in df.columns or col_valor not in df.columns:
         raise ValueError(f"Las columnas '{col_categoria}' y '{col_valor}' deben estar presentes en el DataFrame.")
@@ -551,6 +781,45 @@ def crear_sunburst_chart(
     color: str = None,
     color_continuous_scale: str = "Blues",
 ) -> px.sunburst:
+    """
+    Crea un gráfico de tipo Sunburst utilizando Plotly Express para visualizar datos jerárquicos.
+
+    Parámetros:
+        df (pd.DataFrame): DataFrame que contiene los datos a visualizar.
+        path (list): Lista de nombres de columnas que definen la jerarquía del gráfico.
+                     Cada columna representa un nivel en la estructura jerárquica.
+        values (str): Nombre de la columna que contiene los valores numéricos para determinar 
+                      el tamaño de cada segmento en el gráfico.
+        titulo (str): Título del gráfico. Por defecto es "Sunburst Chart".
+        color (str): Nombre de la columna para colorear los segmentos. Si no se especifica, 
+                     se usa la columna 'values'. Por defecto es None.
+        color_continuous_scale (str): Escala de colores continua para el gráfico. 
+                                      Por defecto es "Blues".
+
+    Retorna:
+        px.sunburst: Un objeto Figure de Plotly Express que representa el gráfico Sunburst.
+
+    Funcionalidad:
+        - Verifica que las columnas especificadas en `path` y `values` existan en el DataFrame.
+        - Convierte la columna `values` a valores numéricos, eliminando valores no válidos o nulos.
+        - Genera un gráfico Sunburst donde cada nivel de la jerarquía está representado por una capa concéntrica.
+        - Los segmentos se dimensionan según los valores de la columna `values` y se colorean según la columna `color`.
+        - Configura el diseño del gráfico con opciones como título centrado, márgenes automáticos y escala de colores.
+
+    Excepciones:
+        - Lanza un ValueError si alguna columna en `path` o `values` no existe en el DataFrame.
+        - Lanza un ValueError si la columna `values` no contiene valores numéricos válidos después del filtrado.
+
+    Ejemplo de uso:
+        fig = crear_sunburst_chart(
+            df=df,
+            path=["CATEGORIA", "SUBCATEGORIA"],
+            values="TOTAL",
+            titulo="Distribución Jerárquica de Datos",
+            color="CATEGORIA",
+            color_continuous_scale="Viridis"
+        )
+    """
     # Verificar si las columnas en 'path' existen en el DataFrame
     for col in path:
         if col not in df.columns:
@@ -590,12 +859,45 @@ def crear_sunburst_chart(
 
 
 def cargar_datos():
+    """
+    Carga y prepara los datos necesarios para el análisis de siniestros viales, 
+    incluyendo información de vehículos, siniestros, actores viales, demografía, 
+    geografía y un shapefile de comunas. Además, limpia y procesa las coordenadas 
+    geográficas para garantizar su consistencia.
+
+    Procesos realizados:
+        - Carga múltiples hojas de un archivo Excel (`BD_Dashboard.xlsx`) en DataFrames separados.
+        - Carga un shapefile de comunas y lo transforma al sistema de coordenadas EPSG:4326.
+        - Limpia y convierte coordenadas geográficas (LATITUD y LONGITUD) en todos los DataFrames relevantes.
+        - Crea un GeoDataFrame (`gdf_puntos`) a partir de las coordenadas limpias de vehículos.
+        - Alinea los sistemas de coordenadas entre el GeoDataFrame de puntos y el shapefile de comunas.
+
+    Retorna:
+        dict: Un diccionario que contiene los siguientes elementos:
+            - 'vehiculos': DataFrame con datos de vehículos involucrados en siniestros.
+            - 'siniestros': DataFrame con datos de caracterización de siniestros.
+            - 'actores': DataFrame con datos de actores viales involucrados.
+            - 'poblacion': DataFrame con datos demográficos de los involucrados.
+            - 'comunas': GeoDataFrame con geometría de las comunas.
+            - 'gdf_puntos': GeoDataFrame con puntos geográficos de vehículos.
+            - 'geografia': DataFrame con datos geográficos y temporales.
+
+    Notas:
+        - Los archivos de entrada deben estar correctamente ubicados en las rutas especificadas.
+        - Las columnas LATITUD y LONGITUD deben estar presentes en los DataFrames relevantes.
+        - El shapefile debe estar en la carpeta `Comunas` y debe ser compatible con GeoPandas.
+
+    Ejemplo de uso:
+        data = cargar_datos()
+        df_vehiculos = data['vehiculos']
+        comunas = data['comunas']
+    """
     # Cargar datos de ambas hojas
-    df_vehiculos = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Vehiculos_Desagregados")
-    df_siniestros = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Caracterización del Siniestro")
-    df_actores = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Caracterización Actores Viales")
-    df_poblacion = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Demografía Involucrados")
-    df_geografia = pd.read_excel(r"BD_Dashboard.xlsx", sheet_name="Datos Geográficos y Temporales")
+    df_vehiculos = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Vehiculos_Desagregados")
+    df_siniestros = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Caracterización del Siniestro")
+    df_actores = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Caracterización Actores Viales")
+    df_poblacion = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Demografía Involucrados")
+    df_geografia = pd.read_excel(r"Dashboard /BD_Dashboard.xlsx", sheet_name="Datos Geográficos y Temporales")
 
     # Cargar shapefile una vez
     comunas = gpd.read_file("Comunas/COMUNAS_UNIDAS.shp").to_crs(epsg=4326)
@@ -632,6 +934,29 @@ def cargar_datos():
 # CREACIÓN DE GRÁFICOS
 # ======================================
 def crear_graficos(data):
+    """
+    Genera una serie de gráficos interactivos utilizando Plotly para analizar datos relacionados con siniestros viales.
+    Los gráficos incluyen distribuciones por tipo de vehículo, clase de servicio, actores viales, demografía,
+    temporalidad (meses, días, horas), comparaciones entre días laborables y fines de semana, y mapas temáticos.
+
+    Parámetros:
+        data (dict): Un diccionario que contiene DataFrames previamente cargados con datos específicos:
+            - 'vehiculos': DataFrame con información sobre vehículos involucrados en siniestros.
+            - 'siniestros': DataFrame con detalles sobre los siniestros.
+            - 'actores': DataFrame con datos sobre los actores viales involucrados.
+            - 'poblacion': DataFrame con información demográfica de los involucrados.
+            - 'geografia': DataFrame con datos geográficos y temporales.
+
+    Retorna:
+        list: Una lista de objetos Figure de Plotly que representan los gráficos generados.
+    
+    Notas:
+        - Los datos deben estar correctamente preprocesados antes de llamar a esta función que es lo que hace que esta función
+        tenga tal volumen de código, una oportunidad de mejora es encapsular los diferentes tratamientos de momento esto funciona.
+        - Los gráficos generados son interactivos y pueden ser integrados en aplicaciones web o dashboards.
+        - Asegúrate de que todas las funciones auxiliares (como `crear_grafico_barras`, `crear_histograma`, etc.) 
+          estén implementadas y disponibles en el entorno.
+    """
     df_vehiculos = data['vehiculos']
     df_siniestros = data['siniestros']
     df_actores = data['actores']
@@ -1347,6 +1672,48 @@ def crear_graficos(data):
 # APLICACIÓN DASH
 # ======================================
 def crear_aplicacion(figs):
+    """
+    Crea y configura una aplicación Dash para visualizar gráficos interactivos relacionados con siniestros viales.
+
+    Parámetros:
+        figs (list): Una lista de objetos Figure de Plotly que representan los gráficos generados previamente.
+                     Estos gráficos se organizan en pestañas y subpestañas dentro de la aplicación.
+
+    Retorna:
+        dash.Dash: Una instancia de la aplicación Dash configurada con el diseño y los callbacks necesarios.
+
+    Procesos realizados:
+        1. **Inicialización de la aplicación**:
+            - Crea una instancia de Dash con un tema de Bootstrap para un diseño consistente y responsivo.
+        
+        2. **Desempaquetado de figuras**:
+            - Extrae las figuras individuales de la lista `figs` y las asigna a variables específicas para su uso en el layout.
+        
+        3. **Creación del layout**:
+            - Define un diseño modular basado en pestañas principales y subpestañas:
+                - **Pestaña Vehículos**: Incluye gráficos sobre la distribución de vehículos, tipos de servicio y evolución mensual.
+                - **Pestaña Siniestros**: Contiene gráficos sobre tipos de siniestros, resumen mensual y totales.
+                - **Pestaña Actores Viales**: Muestra información sobre actores involucrados, incluyendo conteo, género y distribución de edad.
+                - **Pestaña Demografía**: Presenta análisis demográficos, como distribución de edad y proporción de género.
+                - **Pestaña Temporalidad**: Incluye gráficos sobre la distribución temporal de siniestros (mensual, diaria, horaria).
+                - **Pestaña Mapas**: Integra mapas interactivos con descripciones dinámicas.
+        
+        4. **Integración de callbacks**:
+            - Implementa callbacks para manejar la interacción con los mapas:
+                - Cambia dinámicamente el iframe del mapa seleccionado.
+                - Actualiza el texto explicativo según el mapa elegido.
+        
+        5. **Configuración de estilos y responsividad**:
+            - Asegura que los gráficos y componentes sean responsivos y adaptables al tamaño de la pantalla.
+            - Aplica estilos consistentes para mejorar la experiencia del usuario.
+
+   
+
+    Notas:
+        - La función requiere que todas las figuras en `figs` estén correctamente generadas y ordenadas.
+        - Los callbacks están diseñados para interactuar con los mapas y actualizar contenido dinámicamente.
+        - Asegúrate de que las dependencias de Dash y Dash Bootstrap Components estén instaladas en el entorno.
+    """
     app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
     
     # Desempaquetar figuras

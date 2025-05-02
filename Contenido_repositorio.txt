@@ -1,0 +1,11 @@
+Esta carpeta es una copia de los archivos que corresponden al repositorio público donde funciona la vista de siniestralidad
+aqui encuentras lo siguiente:
+-assets: es donde se encuentran los mapas que se proyectan en la sección mapas, en caso de querer generar nuevos mapas, 
+es necesario crear un script de python que utilice los datos que se quieran mostrar y que exporte el mapa en formato HTML,
+recomendado utilizar la librería Folium
+-Comunas: Contiene el shapefile comunas es necesario para la visualización de los mapas por lo que recomiendo no borrarla
+-app.py: Es el script que ejecuta el Dashboard y permite visualizarlo en servidor local, importante no modificar nada en el
+-codigo.txt: Es un archivo que funciona como seguro en caso de cualquier imprevisto con el archivo dashboard.py solo hay que 
+borrar todo el codigo del archivo Dashboard.py y pegar el de este archivo, esto restaurará el dashboard a la version original
+-Dasboard.py: Este archivo contiene toda la lógica para que funcione el dashboard, es el archivo más importante, cualquier 
+modificación que se realice en este archivo, debe actualizarse tambien en el repositorio público
